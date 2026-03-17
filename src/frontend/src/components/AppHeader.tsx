@@ -1,6 +1,13 @@
-import { Bell, Menu, User } from "lucide-react";
+import { Bell, Menu } from "lucide-react";
+import { useLanguage } from "../contexts/LanguageContext";
 
-export function AppHeader() {
+interface AppHeaderProps {
+  onNavigate?: (page: string) => void;
+}
+
+export function AppHeader({ onNavigate }: AppHeaderProps) {
+  const { currentLang } = useLanguage();
+
   return (
     <header
       className="sticky top-0 z-50 w-full"
@@ -32,8 +39,20 @@ export function AppHeader() {
         </div>
 
         <div className="flex items-center gap-1">
+          {/* Language pill */}
+          <span
+            className="px-2 py-0.5 rounded-full text-[11px] font-bold"
+            style={{
+              background: "rgba(61,111,224,0.2)",
+              color: "#3D6FE0",
+              border: "1px solid rgba(61,111,224,0.3)",
+            }}
+          >
+            {currentLang}
+          </span>
           <button
             type="button"
+            onClick={() => onNavigate?.("notifications")}
             className="relative flex items-center justify-center w-9 h-9 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-colors"
             data-ocid="nav.button"
           >
@@ -42,13 +61,6 @@ export function AppHeader() {
               className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full"
               style={{ background: "#3D6FE0" }}
             />
-          </button>
-          <button
-            type="button"
-            className="flex items-center justify-center w-9 h-9 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-colors"
-            data-ocid="nav.button"
-          >
-            <User size={18} />
           </button>
         </div>
       </div>

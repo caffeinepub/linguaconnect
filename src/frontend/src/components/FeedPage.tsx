@@ -1,4 +1,4 @@
-import { Loader2, RefreshCw } from "lucide-react";
+import { Loader2, Plus, RefreshCw } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 import type { Post } from "../backend";
@@ -8,6 +8,8 @@ import {
   useAllPosts,
   useLikePost,
 } from "../hooks/useQueries";
+import { CommentsDrawer } from "./CommentsDrawer";
+import { CreatePostModal } from "./CreatePostModal";
 import { PostCard } from "./PostCard";
 
 type FilterTab = "tous" | "audios" | "textes";
@@ -20,6 +22,8 @@ const TABS: { id: FilterTab; label: string }[] = [
 
 export function FeedPage() {
   const [filter, setFilter] = useState<FilterTab>("tous");
+  const [showCreate, setShowCreate] = useState(false);
+  const [commentPostId, setCommentPostId] = useState<string | null>(null);
   const { data: posts, isLoading, refetch } = useAllPosts();
   const addSample = useAddSamplePosts();
   const likeMutation = useLikePost();
@@ -43,7 +47,7 @@ export function FeedPage() {
   });
 
   return (
-    <div className="flex flex-col flex-1 overflow-hidden">
+    <div className="flex flex-col flex-1 overflow-hidden relative">
       {/* Filter tabs */}
       <div
         className="sticky top-[57px] z-40 px-4 py-3 flex gap-2"
@@ -119,12 +123,12 @@ export function FeedPage() {
               Aucun post pour l&apos;instant
             </p>
             <p className="text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>
-              Soyez le premier à partager votre voix !
+              Soyez le premier à partager votre voix !
             </p>
           </div>
         ) : (
           <AnimatePresence>
-            <div className="flex flex-col gap-3 p-4">
+            <div className="flex flex-col gap-3 p-4 pb-24">
               {filtered.map((post, i) => (
                 <motion.div
                   key={post.postId}
@@ -136,6 +140,8 @@ export function FeedPage() {
                   <PostCard
                     post={post}
                     onLike={(id) => likeMutation.mutate(id)}
+                    onOpenComments={(id) => setCommentPostId(id)}
+                    onAudioReply={() => setShowCreate(true)}
                     index={i + 1}
                   />
                 </motion.div>
@@ -144,6 +150,29 @@ export function FeedPage() {
           </AnimatePresence>
         )}
       </div>
+
+      {/* FAB */}
+      <motion.button
+        type="button"
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.92 }}
+        onClick={() => setShowCreate(true)}
+        className="absolute bottom-4 right-4 w-14 h-14 rounded-full flex items-center justify-center shadow-lg z-30"
+        style={{
+          background: "#3D6FE0",
+          boxShadow:
+            "0 0 0 4px rgba(61,111,224,0.25), 0 4px 20px rgba(61,111,224,0.5)",
+        }}
+        data-ocid="feed.open_modal_button"
+      >
+        <Plus size={24} className="text-white" />
+      </motion.button>
+
+      <CreatePostModal open={showCreate} onClose={() => setShowCreate(false)} />
+      <CommentsDrawer
+        postId={commentPostId}
+        onClose={() => setCommentPostId(null)}
+      />
     </div>
   );
 }

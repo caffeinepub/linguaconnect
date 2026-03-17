@@ -10,6 +10,7 @@ import {
   SkipBack,
   SkipForward,
 } from "lucide-react";
+import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import type { Post } from "../backend";
 import { PostTypeEnum } from "../backend";
@@ -40,6 +41,8 @@ const WAVE_HEIGHTS = [
 interface PostCardProps {
   post: Post;
   onLike: (postId: string) => void;
+  onOpenComments: (postId: string) => void;
+  onAudioReply?: () => void;
   index: number;
 }
 
@@ -50,9 +53,17 @@ function isAudioPost(post: Post): boolean {
   );
 }
 
-export function PostCard({ post, onLike, index }: PostCardProps) {
+export function PostCard({
+  post,
+  onLike,
+  onOpenComments,
+  onAudioReply,
+  index,
+}: PostCardProps) {
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [liked, setLiked] = useState(false);
+  const [showOriginal, setShowOriginal] = useState(false);
 
   useEffect(() => {
     if (!playing) return;
@@ -68,6 +79,11 @@ export function PostCard({ post, onLike, index }: PostCardProps) {
     return () => clearInterval(interval);
   }, [playing]);
 
+  const handleLike = () => {
+    setLiked((prev) => !prev);
+    if (!liked) onLike(post.postId);
+  };
+
   const isAudio = isAudioPost(post);
   const duration = post.audioDuration ?? 0n;
   const elapsed = BigInt(Math.floor((Number(duration) * progress) / 100));
@@ -75,6 +91,10 @@ export function PostCard({ post, onLike, index }: PostCardProps) {
   const words = post.contentText.split(" ");
   const highlight1 = Math.floor(words.length * 0.2);
   const highlight2 = Math.floor(words.length * 0.5);
+
+  const displayText = showOriginal
+    ? post.contentText
+    : post.translationText || post.contentText;
 
   return (
     <article
@@ -109,7 +129,7 @@ export function PostCard({ post, onLike, index }: PostCardProps) {
                 className="w-1.5 h-1.5 rounded-full"
                 style={{ background: "#3D6FE0" }}
               />
-              Publié en {post.originalLanguage}
+              {post.originalLanguage}
             </span>
           </div>
           <span className="text-[12px]" style={{ color: "#6B7280" }}>
@@ -265,13 +285,8 @@ export function PostCard({ post, onLike, index }: PostCardProps) {
             className="text-[15px] font-medium mb-2"
             style={{ color: "#111827" }}
           >
-            {post.contentText}
+            {displayText}
           </p>
-          {post.translationText && (
-            <p className="text-[13px]" style={{ color: "#6B7280" }}>
-              🌐 {post.translationText}
-            </p>
-          )}
         </div>
       )}
 
@@ -279,27 +294,38 @@ export function PostCard({ post, onLike, index }: PostCardProps) {
       <div className="flex items-center justify-between px-4 pb-3">
         <button
           type="button"
+          onClick={() => setShowOriginal((v) => !v)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium transition-colors hover:bg-gray-50"
-          style={{ border: "1px solid #E5E7EB", color: "#374151" }}
+          style={{
+            border: "1px solid #E5E7EB",
+            color: showOriginal ? "#3D6FE0" : "#374151",
+          }}
+          data-ocid={`feed.toggle.${index}`}
         >
           <RefreshCw size={12} />
-          Voir version originale
+          {showOriginal ? "Voir traduction" : "Voir original"}
         </button>
         <div className="flex items-center gap-4">
-          <button
+          <motion.button
             type="button"
-            onClick={() => onLike(post.postId)}
-            className="flex items-center gap-1.5 transition-transform active:scale-110"
-            style={{ color: "#6B7280" }}
+            onClick={handleLike}
+            whileTap={{ scale: 1.3 }}
+            className="flex items-center gap-1.5 transition-transform"
+            style={{ color: liked ? "#ef4444" : "#6B7280" }}
             data-ocid={`feed.toggle.${index}`}
           >
-            <Heart size={18} className="hover:text-red-500 transition-colors" />
+            <Heart
+              size={18}
+              fill={liked ? "#ef4444" : "none"}
+              className="transition-colors"
+            />
             <span className="text-[13px] font-medium">
-              {post.likesCount.toString()}
+              {(post.likesCount + (liked ? 1n : 0n)).toString()}
             </span>
-          </button>
+          </motion.button>
           <button
             type="button"
+            onClick={() => onOpenComments(post.postId)}
             className="flex items-center gap-1.5"
             style={{ color: "#6B7280" }}
             data-ocid={`feed.button.${index}`}
@@ -316,6 +342,7 @@ export function PostCard({ post, onLike, index }: PostCardProps) {
         <div className="px-4 pb-4">
           <button
             type="button"
+            onClick={onAudioReply}
             className="w-full flex items-center justify-center gap-2 py-2.5 rounded-full text-[13px] font-semibold text-white transition-all active:scale-[0.98]"
             style={{ background: "#233B57" }}
             data-ocid={`feed.secondary_button.${index}`}

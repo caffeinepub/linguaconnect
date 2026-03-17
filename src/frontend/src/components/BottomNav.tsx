@@ -1,23 +1,29 @@
-import { Globe, Home, MessageCircle, Mic, User } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-import { useState } from "react";
+import { Globe, Home, Mic, Plus, User, Users } from "lucide-react";
 
-interface NavItem {
-  icon: LucideIcon;
-  label: string;
-  center?: boolean;
+interface BottomNavProps {
+  activePage: string;
+  onNavigate: (page: string) => void;
 }
 
-const items: NavItem[] = [
-  { icon: Home, label: "Accueil" },
-  { icon: Globe, label: "Explorer" },
-  { icon: Mic, label: "Enregistrer", center: true },
-  { icon: MessageCircle, label: "Messages" },
-  { icon: User, label: "Profil" },
-];
+export function BottomNav({ activePage, onNavigate }: BottomNavProps) {
+  const isActive = (p: string) => activePage === p;
 
-export function BottomNav() {
-  const [active, setActive] = useState(0);
+  const NavBtn = ({
+    page,
+    icon: Icon,
+    label,
+  }: { page: string; icon: React.ElementType; label: string }) => (
+    <button
+      type="button"
+      onClick={() => onNavigate(page)}
+      className="flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-colors"
+      style={{ color: isActive(page) ? "#3D6FE0" : "rgba(255,255,255,0.45)" }}
+      data-ocid="nav.link"
+    >
+      <Icon size={20} />
+      <span className="text-[10px] font-medium">{label}</span>
+    </button>
+  );
 
   return (
     <nav
@@ -29,41 +35,46 @@ export function BottomNav() {
       }}
       data-ocid="nav.section"
     >
-      {items.map((item, idx) => {
-        const Icon = item.icon;
-        const isActive = active === idx;
-        if (item.center) {
-          return (
-            <button
-              type="button"
-              key={item.label}
-              onClick={() => setActive(idx)}
-              className="flex items-center justify-center w-14 h-14 rounded-full transition-transform active:scale-95"
-              style={{
-                background: "#3D6FE0",
-                boxShadow:
-                  "0 0 0 4px rgba(61,111,224,0.25), 0 4px 16px rgba(61,111,224,0.4)",
-              }}
-              data-ocid="nav.button"
-            >
-              <Icon size={24} className="text-white" />
-            </button>
-          );
-        }
-        return (
-          <button
-            type="button"
-            key={item.label}
-            onClick={() => setActive(idx)}
-            className="flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-colors"
-            style={{ color: isActive ? "#3D6FE0" : "rgba(255,255,255,0.45)" }}
-            data-ocid="nav.link"
-          >
-            <Icon size={20} />
-            <span className="text-[10px] font-medium">{item.label}</span>
-          </button>
-        );
-      })}
+      <NavBtn page="feed" icon={Home} label="Accueil" />
+      <NavBtn page="explorer" icon={Globe} label="Explorer" />
+
+      {/* Center dual buttons */}
+      <div className="flex items-center gap-2">
+        {/* + Video button */}
+        <button
+          type="button"
+          onClick={() => onNavigate("video")}
+          className="flex items-center justify-center w-11 h-11 rounded-xl transition-transform active:scale-95"
+          style={{
+            background: "#1F2F45",
+            border: "2px solid #3D6FE0",
+            boxShadow: "0 4px 12px rgba(61,111,224,0.3)",
+          }}
+          data-ocid="nav.button"
+        >
+          <Plus size={20} className="text-white" />
+        </button>
+
+        {/* Mic Audio button */}
+        <button
+          type="button"
+          onClick={() => onNavigate("create")}
+          className="flex items-center justify-center w-13 h-13 rounded-full transition-transform active:scale-95"
+          style={{
+            background: "#3D6FE0",
+            width: 52,
+            height: 52,
+            boxShadow:
+              "0 0 0 4px rgba(61,111,224,0.25), 0 4px 16px rgba(61,111,224,0.4)",
+          }}
+          data-ocid="nav.button"
+        >
+          <Mic size={22} className="text-white" />
+        </button>
+      </div>
+
+      <NavBtn page="amis" icon={Users} label="Amis" />
+      <NavBtn page="profile" icon={User} label="Profil" />
     </nav>
   );
 }
