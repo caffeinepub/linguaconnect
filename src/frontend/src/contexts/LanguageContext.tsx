@@ -9,6 +9,11 @@ export const LANGUAGES = [
   { code: "AR", name: "العربية" },
   { code: "ZH", name: "中文" },
   { code: "PT", name: "Português" },
+  // Langues africaines
+  { code: "FON", name: "Fon (Bénin)" },
+  { code: "YO", name: "Yoruba (Nigeria)" },
+  { code: "DYU", name: "Dioula (Côte d'Ivoire)" },
+  { code: "LN", name: "Lingala (Congo)" },
 ];
 
 interface LanguageContextValue {

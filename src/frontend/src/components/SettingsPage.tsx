@@ -61,13 +61,13 @@ export function SettingsPage() {
         >
           LANGUE PRINCIPALE
         </h2>
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {LANGUAGES.map((l) => (
             <button
               key={l.code}
               type="button"
               onClick={() => setCurrentLang(l.code)}
-              className="py-2 rounded-xl text-sm font-bold transition-all"
+              className="py-2 px-1 rounded-xl transition-all flex flex-col items-center gap-0.5"
               style={{
                 background:
                   currentLang === l.code ? "#3D6FE0" : "rgba(255,255,255,0.08)",
@@ -76,7 +76,20 @@ export function SettingsPage() {
               }}
               data-ocid="settings.toggle"
             >
-              {l.code}
+              <span className="text-sm font-bold leading-tight">{l.code}</span>
+              <span
+                className="text-xs leading-tight"
+                style={{
+                  opacity: 0.6,
+                  fontSize: "0.6rem",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  maxWidth: "100%",
+                }}
+              >
+                {l.name}
+              </span>
             </button>
           ))}
         </div>
